@@ -7,6 +7,8 @@ interface HabitContextType {
   habits: Habit[];
   addHabit: (data: HabitFormData) => void;
   toggleHabit: (habitId: string) => void;
+  deleteHabit: (habitId: string) => void;
+  updateHabitNotes: (habitId: string, notes: string) => void;
   loading: boolean;
 }
 
@@ -67,8 +69,28 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
+  const deleteHabit = (habitId: string) => {
+    setHabits((prev) => prev.filter((habit) => habit.id !== habitId));
+    toast({
+      title: "Hábito removido",
+      description: "O hábito foi removido com sucesso.",
+    });
+  };
+
+  const updateHabitNotes = (habitId: string, notes: string) => {
+    setHabits((prev) =>
+      prev.map((habit) =>
+        habit.id === habitId ? { ...habit, notes } : habit
+      )
+    );
+    toast({
+      title: "Observações atualizadas",
+      description: "As observações foram salvas com sucesso.",
+    });
+  };
+
   return (
-    <HabitContext.Provider value={{ habits, addHabit, toggleHabit, loading }}>
+    <HabitContext.Provider value={{ habits, addHabit, toggleHabit, deleteHabit, updateHabitNotes, loading }}>
       {children}
     </HabitContext.Provider>
   );

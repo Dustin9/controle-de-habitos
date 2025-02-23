@@ -6,7 +6,7 @@ import { AddHabitDialog } from "@/components/AddHabitDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 function HabitDashboard() {
-  const { habits, addHabit, toggleHabit, loading } = useHabits();
+  const { habits, addHabit, toggleHabit, deleteHabit, updateHabitNotes, loading } = useHabits();
 
   if (loading) {
     return (
@@ -45,6 +45,8 @@ function HabitDashboard() {
                 key={habit.id}
                 habit={habit}
                 onToggle={toggleHabit}
+                onDelete={deleteHabit}
+                onUpdateNotes={updateHabitNotes}
               />
             ))
           )}

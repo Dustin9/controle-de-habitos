@@ -12,6 +12,7 @@ export interface Habit {
   progress: number;
   createdAt: string;
   completedDates: string[];
+  notes?: string;
 }
 
 export interface HabitFormData {
@@ -19,4 +20,5 @@ export interface HabitFormData {
   category: HabitCategory;
   frequency: HabitFrequency;
   goal: number;
+  notes?: string;
 }
