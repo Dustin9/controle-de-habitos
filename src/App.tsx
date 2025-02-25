@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/forgotPassaword";
+import Register from "./pages/register";
 import Login from "./pages/login";
 
 const queryClient = new QueryClient();
@@ -15,12 +17,13 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
+      <Routes>
           <Route path="/" element={<Login />} />
-          <Route path="/index" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<NotFound />} />
-        </Routes>
+      </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

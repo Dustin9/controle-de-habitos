@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
-export default function Login() {
+export default function Register() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,31 +18,31 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("YOUR_BACKEND_URL/api/auth/login", {
+      const response = await fetch("YOUR_BACKEND_URL/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("token", data.token);
-        navigate("/");
+        navigate("/login");
         toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo de volta.",
+          title: "Conta criada com sucesso!",
+          description: "Faça login para continuar.",
         });
       } else {
-        throw new Error(data.message || "Erro ao fazer login");
+        throw new Error(data.message || "Erro ao criar conta");
       }
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: error instanceof Error ? error.message : "Erro ao fazer login",
+        description:
+          error instanceof Error ? error.message : "Erro ao criar conta",
       });
     } finally {
       setLoading(false);
@@ -54,11 +54,23 @@ export default function Login() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Entre na sua conta
+            Criar nova conta
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
+            <div>
+              <Label htmlFor="name">Nome</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </div>
             <div>
               <Label htmlFor="email">E-mail</Label>
               <Input
@@ -77,7 +89,7 @@ export default function Login() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -85,23 +97,17 @@ export default function Login() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex justify-end">
             <Link
-              to="/forgot-password"
+              to="/login"
               className="text-sm font-medium text-primary hover:text-primary/90"
             >
-              Esqueceu sua senha?
-            </Link>
-            <Link
-              to="/register"
-              className="text-sm font-medium text-primary hover:text-primary/90"
-            >
-              Criar conta
+              Já tem uma conta? Faça login
             </Link>
           </div>
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Entrando..." : "Entrar"}
+            {loading ? "Criando conta..." : "Criar conta"}
           </Button>
         </form>
       </div>
