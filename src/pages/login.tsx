@@ -1,12 +1,25 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 
-export default function Login() {
+interface User {   
+    "message": string,
+    "token": string,
+    "user": {
+      "id": string,
+      "email": string,
+    }
+
+}
+interface LoginProps {
+  user: User
+  setUserdata: (data: User) => void
+}
+export default function Login({user, setUserdata}: LoginProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -18,7 +31,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch("YOUR_BACKEND_URL/api/auth/login", {
+      const response = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -30,6 +43,7 @@ export default function Login() {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
+        setUserdata(data);
         navigate("/");
         toast({
           title: "Login realizado com sucesso!",
@@ -48,7 +62,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">

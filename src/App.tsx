@@ -8,25 +8,39 @@ import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/forgotPassaword";
 import Register from "./pages/register";
 import Login from "./pages/login";
+import PrivateRoute from "./components/PrivateRoute";
+import { useState } from "react";
 
 const queryClient = new QueryClient();
+interface User {   
+  "message": string,
+  "token": string,
+  "user": {
+    "id": string,
+    "email": string,
+  }
+}
 
-const App = () => (
+const App = () => { 
+const [userdata, setUserdata] = useState<User | null>(null);
+  return (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
       <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login user={userdata} setUserdata={setUserdata}/>} />
+      <Route path="/register" element={<Register />} />
+      <Route element={<PrivateRoute user={userdata}/>}>
+          <Route path="/" element={<Index />}/>
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<NotFound />} />
+      </Route>
       </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
-);
+)};
 
 export default App;
