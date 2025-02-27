@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -74,13 +75,14 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <ThemeToggle />
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
             Recuperar senha
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-foreground">
             Digite seu e-mail para receber um link de recuperação de senha.
           </p>
         </div>
@@ -95,19 +97,21 @@ export default function ForgotPassword() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-xl hover:rounded-xl transition-all"
+              placeholder="Digite seu e-mail"
             />
           </div>
 
           <div className="flex justify-end">
             <Link
               to="/login"
-              className="text-sm font-medium text-primary hover:text-primary/90"
+              className="text-sm font-medium text-foreground hover:text-accent"
             >
               Voltar para o login
             </Link>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full rounded-xl hover:rounded-xl transition-all" disabled={loading}>
             {loading ? "Enviando..." : "Enviar e-mail de recuperação"}
           </Button>
         </form>

@@ -18,6 +18,7 @@ interface User {
   "user": {
     "id": string,
     "email": string,
+    "name": string
   }
 }
 
@@ -32,9 +33,9 @@ const [userdata, setUserdata] = useState<User | null>(null);
       <Routes>
       <Route path="/login" element={<Login user={userdata} setUserdata={setUserdata}/>} />
       <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route element={<PrivateRoute user={userdata}/>}>
           <Route path="/" element={<Index />}/>
-          <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="*" element={<NotFound />} />
       </Route>
       </Routes>

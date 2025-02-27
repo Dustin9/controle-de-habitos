@@ -58,8 +58,8 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2">
-          <Plus className="h-5 w-5" />
+      <Button className="gap-2 rounded-xl hover:rounded-xl transition-all">
+      <Plus className="h-5 w-5" />
           Novo Hábito
         </Button>
       </DialogTrigger>

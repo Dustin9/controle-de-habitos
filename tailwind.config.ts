@@ -26,33 +26,32 @@ export default {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         primary: {
-          DEFAULT: "#D3E4FD",
-          foreground: "#2D3748",
-          hover: "#B9D7FC",
-        },
-        secondary: {
           DEFAULT: "#F2FCE2",
           foreground: "#2D3748",
         },
+        secondary: {
+          DEFAULT: "#E6F5D0",
+          foreground: "#2D3748",
+        },
         accent: {
-          DEFAULT: "#E5DEFF",
+          DEFAULT: "#F7FBF0",
           foreground: "#2D3748",
         },
         success: {
-          DEFAULT: "#68D391",
+          DEFAULT: "#10B981",  
           foreground: "#FFFFFF",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "#FF6B6B",
+          foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#E5E7EB",  
+          foreground: "#4B5563",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "#FFFFFF",
+          foreground: "#2D3748",
         },
         card: {
           DEFAULT: "#F7FAFC",

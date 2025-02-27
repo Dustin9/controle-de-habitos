@@ -54,7 +54,8 @@ export function HabitCard({ habit, onToggle, onDelete, onUpdateNotes }: HabitCar
             <span className="text-gray-600">Progresso</span>
             <span className="font-medium">{Math.round(habit.progress)}%</span>
           </div>
-          <Progress value={habit.progress} className="h-2" />
+          <Progress value={habit.progress}
+          className="h-2.5 bg-muted/50 [&>div]:bg-success [&>div]:transition-all [&>div]:duration-500 rounded-full" />
         </div>
       </div>
 

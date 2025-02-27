@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 interface User {   
     "message": string,
@@ -12,15 +13,17 @@ interface User {
     "user": {
       "id": string,
       "email": string,
+      "name": string // Adicione o name
     }
-
 }
+
 interface LoginProps {
   user: User
   setUserdata: (data: User) => void
 }
+
 export default function Login({user, setUserdata}: LoginProps) {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState(""); // Alterado de email para identifier
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
@@ -36,7 +39,7 @@ export default function Login({user, setUserdata}: LoginProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ identifier, password }), // Alterado para enviar identifier
       });
 
       const data = await response.json();
@@ -47,7 +50,7 @@ export default function Login({user, setUserdata}: LoginProps) {
         navigate("/");
         toast({
           title: "Login realizado com sucesso!",
-          description: "Bem-vindo de volta.",
+          description: `Bem-vindo, ${data.user.name || data.user.email}!`, // Mostra o nome ou email
         });
       } else {
         throw new Error(data.message || "Erro ao fazer login");
@@ -62,26 +65,30 @@ export default function Login({user, setUserdata}: LoginProps) {
       setLoading(false);
     }
   };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <ThemeToggle />
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Entre na sua conta
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
+        Entre na sua conta
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="identifier">Email ou Nome de Usuário</Label>
               <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="identifier"
+                name="identifier"
+                type="text"
+                autoComplete="username"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
+                placeholder="Email ou nome de usuario"
+                className="w-full rounded-xl hover:rounded-xl transition-all"
               />
             </div>
             <div>
@@ -94,6 +101,8 @@ export default function Login({user, setUserdata}: LoginProps) {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="Digite sua senha"
+                className="w-full rounded-xl hover:rounded-xl transition-all"
               />
             </div>
           </div>
@@ -101,19 +110,19 @@ export default function Login({user, setUserdata}: LoginProps) {
           <div className="flex items-center justify-between">
             <Link
               to="/forgot-password"
-              className="text-sm font-medium text-primary hover:text-primary/90"
+              className="text-sm font-medium text-foreground hover:text-accent"
             >
               Esqueceu sua senha?
             </Link>
             <Link
               to="/register"
-              className="text-sm font-medium text-primary hover:text-primary/90"
+              className="text-sm font-medium text-foreground hover:text-accent"
             >
               Criar conta
             </Link>
           </div>
 
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full rounded-xl hover:rounded-xl transition-all" disabled={loading} >
             {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>
