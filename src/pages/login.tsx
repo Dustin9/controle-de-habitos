@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { setAuthToken } from "@/lib/auth";
 
 interface User {   
     "message": string,
@@ -45,7 +45,7 @@ export default function Login({user, setUserdata}: LoginProps) {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem("token", data.token);
+        setAuthToken(data.token); // Using our auth utility instead of localStorage directly
         setUserdata(data);
         navigate("/");
         toast({

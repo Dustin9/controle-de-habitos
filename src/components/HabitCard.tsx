@@ -29,7 +29,7 @@ export function HabitCard({ habit, onToggle, onDelete, onUpdateNotes }: HabitCar
             <span className="inline-block rounded-full bg-primary px-2 py-1 text-xs font-medium">
               {habit.category}
             </span>
-            <h3 className="mt-2 text-lg font-semibold text-gray-800">{habit.name}</h3>
+            <h3 className="mt-2 text-lg font-semibold text-gray-800">{habit.title}</h3>
             <p className="text-sm text-gray-500">
               Frequência: {habit.frequency}
             </p>
@@ -37,7 +37,7 @@ export function HabitCard({ habit, onToggle, onDelete, onUpdateNotes }: HabitCar
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onToggle(habit.id);
+              onToggle(habit._id);
             }}
             className={cn(
               "rounded-full p-2 transition-colors",

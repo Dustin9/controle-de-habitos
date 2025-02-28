@@ -1,24 +1,45 @@
+export type HabitCategory = "Saúde" | "Trabalho" | "Estudo" | "Lazer" | "Outros";
 
-export type HabitCategory = "saúde" | "trabalho" | "estudo" | "lazer" | "outros";
+export type HabitFrequency = "Diário" | "Semanal" | "Todo dia";
 
-export type HabitFrequency = "diário" | "semanal";
+interface ProgressEntry {
+  date: string;
+  completed: boolean;
+  _id: string;
+}
 
-export interface Habit {
-  id: string;
+export interface BackendHabit {
+  _id: string;
   name: string;
+  description: string;
+  goal: number;
   category: HabitCategory;
   frequency: HabitFrequency;
-  goal: number;
-  progress: number;
+  user: string;
+  progress: ProgressEntry[];
   createdAt: string;
-  completedDates: string[];
-  notes?: string;
+  updatedAt: string;
+  __v: number;
+}
+
+// Frontend habit representation
+export interface Habit {
+  _id: string;
+  title: string; // maps from name
+  description: string;
+  goal: number;
+  category: HabitCategory;
+  frequency: HabitFrequency;
+  progress: number; // calculated from progress array
+  completedDates: string[]; // extracted from progress array
+  createdAt: string;
+  streak?: number; // number of consecutive days completed (for "Todo dia" habits)
 }
 
 export interface HabitFormData {
-  name: string;
+  title: string; // will be sent as name
+  description: string;
+  goal?: number; // Make goal optional since it's not needed for "Todo dia"
   category: HabitCategory;
   frequency: HabitFrequency;
-  goal: number;
-  notes?: string;
 }

@@ -33,16 +33,16 @@ interface HabitDetailsProps {
 }
 
 export function HabitDetails({ habit, open, onOpenChange, onDelete, onUpdateNotes }: HabitDetailsProps) {
-  const [notes, setNotes] = useState(habit.notes || "");
+  const [notes, setNotes] = useState(habit.description || "");
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
 
   const handleDelete = () => {
-    onDelete(habit.id);
+    onDelete(habit._id);
     onOpenChange(false);
   };
 
   const handleSaveNotes = () => {
-    onUpdateNotes(habit.id, notes);
+    onUpdateNotes(habit._id, notes);
   };
 
   return (
@@ -50,7 +50,7 @@ export function HabitDetails({ habit, open, onOpenChange, onDelete, onUpdateNote
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>{habit.name}</DialogTitle>
+            <DialogTitle>{habit.title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
