@@ -229,24 +229,45 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Toggling habit:', habitId);
       
-      // Get today's date
-      const now = new Date();
-      const todayISO = now.toISOString();
-      
-      const response = await updateHabitProgress(habitId, todayISO);
-      console.log('Progress update response:', response);
-      
-      // After updating in the backend, fetch fresh data
-      const backendHabits = await getHabitsApi();
-      if (backendHabits) {
-        const mappedHabits = backendHabits.map(mapHabitData);
-        setHabits(mappedHabits);
-        
-        toast({
-          title: "Hábito atualizado",
-          description: "Progresso atualizado com sucesso!",
-        });
-      }
+      // Update the local state immediately
+      setHabits(prevHabits => 
+        prevHabits.map(habit => {
+          if (habit._id !== habitId) return habit;
+          
+          // Update progress based on frequency
+          let newProgress = 0;
+          
+          switch (habit.frequency) {
+            case 'Todo dia':
+            case 'Diário':
+              // For daily habits, toggle between 0 and 100
+              newProgress = habit.progress === 0 ? 100 : 0;
+              break;
+            
+            case 'Semanal':
+              // For weekly habits, increment by 1/7 if not complete
+              if (habit.progress < 100) {
+                newProgress = Math.min(100, habit.progress + (100/7));
+              } else {
+                newProgress = 0; // Reset if already complete
+              }
+              break;
+            
+            default:
+              newProgress = habit.progress;
+          }
+          
+          return {
+            ...habit,
+            progress: newProgress
+          };
+        })
+      );
+
+      toast({
+        title: "Hábito atualizado",
+        description: "Progresso atualizado com sucesso!",
+      });
     } catch (error) {
       if (error instanceof AxiosError) {
         console.error('Error toggling habit:', error);
