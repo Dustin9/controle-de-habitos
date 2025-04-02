@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Habit as HabitType, HabitFormData, BackendHabit } from "@/types/habit";
 import { useToast } from "@/hooks/use-toast";
-import { createHabit as createHabitApi, getHabits as getHabitsApi, updateHabitProgress } from "@/lib/api";
+import { createHabit as createHabitApi, getHabits as getHabitsApi, updateHabitProgress, deleteHabit as deleteHabitApi } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import { isAuthenticated } from "@/lib/auth";
 import { AxiosError } from 'axios';
@@ -19,87 +19,86 @@ interface HabitContextType {
 const HabitContext = createContext<HabitContextType | undefined>(undefined);
 
 const mapHabitData = (backendHabit: BackendHabit): HabitType => {
-  // Get current date in local timezone
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const todayStr = today.toISOString().split('T')[0];
+  try {
+    // Get current date in local timezone
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStr = today.toISOString().split('T')[0];
 
-  console.log('Raw current date:', now.toString());
-  console.log('Normalized today:', todayStr);
+    console.log('Mapping habit:', backendHabit.name);
+    console.log('Raw current date:', now.toString());
+    console.log('Normalized today:', todayStr);
 
-  // Convert backend dates to local timezone for comparison
-  const completedDates = backendHabit.progress
-    .filter(p => p.completed)
-    .map(p => {
-      // Parse the UTC date and convert to local date
-      const utcDate = new Date(p.date);
-      const localDate = new Date(utcDate.getTime());
-      return localDate.toISOString().split('T')[0];
-    });
+    // Ensure progress is an array
+    const progressArray = Array.isArray(backendHabit.progress) ? backendHabit.progress : [];
 
-  console.log('Mapping habit:', backendHabit.name);
-  console.log('Raw completed dates:', backendHabit.progress.filter(p => p.completed).map(p => p.date));
-  console.log('Normalized completed dates:', completedDates);
+    // Count total progress entries as streak
+    const streak = progressArray.length;
 
-  // Calculate progress based on frequency
-  let progress = 0;
-  let streak = 0;
+    // Convert backend dates to local timezone for comparison
+    const completedDates = progressArray
+      .filter(p => p && p.completed && p.date)
+      .map(p => {
+        try {
+          // Parse the UTC date and convert to local date
+          const utcDate = new Date(p.date);
+          const localDate = new Date(utcDate.getTime());
+          return localDate.toISOString().split('T')[0];
+        } catch (error) {
+          console.error('Error parsing date:', p.date);
+          return null;
+        }
+      })
+      .filter((date): date is string => date !== null);
 
-  if (backendHabit.frequency === 'Todo dia') {
-    // For "Todo dia", calculate streak
-    let currentStreak = 0;
-    const checkDate = new Date(today);
-    
-    while (true) {
-      const dateStr = checkDate.toISOString().split('T')[0];
-      if (completedDates.includes(dateStr)) {
-        currentStreak++;
-        checkDate.setDate(checkDate.getDate() - 1);
-      } else {
-        break;
+    console.log('Raw completed dates:', progressArray.filter(p => p.completed).map(p => p.date));
+    console.log('Normalized completed dates:', completedDates);
+    console.log('Total progress entries (streak):', streak);
+
+    // Calculate progress based on frequency
+    let progress = 0;
+
+    if (backendHabit.frequency === 'Todo dia') {
+      progress = completedDates.includes(todayStr) ? 100 : 0;
+      console.log('Todo dia - Progress:', progress);
+    } else if (backendHabit.frequency === 'Semanal') {
+      // For "Semanal", calculate progress based on days in current week
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+      
+      let completedThisWeek = 0;
+      const thisWeekDates = [];
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(startOfWeek);
+        date.setDate(startOfWeek.getDate() + i);
+        const dateStr = date.toISOString().split('T')[0];
+        thisWeekDates.push(dateStr);
+        if (completedDates.includes(dateStr)) {
+          completedThisWeek++;
+        }
       }
+      progress = (completedThisWeek / 7) * 100;
+      console.log('Semanal - Week dates:', thisWeekDates);
+      console.log('Completed this week:', completedThisWeek, 'Progress:', progress);
     }
-    streak = currentStreak;
-    progress = completedDates.includes(todayStr) ? 100 : 0;
-    console.log('Todo dia - Streak:', streak, 'Progress:', progress);
-  } else if (backendHabit.frequency === 'Diário') {
-    // For "Diário", check if completed today
-    progress = completedDates.includes(todayStr) ? 100 : 0;
-    console.log('Diário - Today:', todayStr);
-    console.log('Diário - Completed today:', completedDates.includes(todayStr), 'Progress:', progress);
-  } else if (backendHabit.frequency === 'Semanal') {
-    // For "Semanal", calculate progress based on days in current week
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
-    
-    let completedThisWeek = 0;
-    const thisWeekDates = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startOfWeek);
-      date.setDate(startOfWeek.getDate() + i);
-      const dateStr = date.toISOString().split('T')[0];
-      thisWeekDates.push(dateStr);
-      if (completedDates.includes(dateStr)) {
-        completedThisWeek++;
-      }
-    }
-    progress = (completedThisWeek / 7) * 100;
-    console.log('Semanal - Week dates:', thisWeekDates);
-    console.log('Completed this week:', completedThisWeek, 'Progress:', progress);
+
+    return {
+      _id: backendHabit._id,
+      title: backendHabit.name || '',
+      description: backendHabit.description || '',
+      goal: backendHabit.goal || 0,
+      category: backendHabit.category || 'Saúde',
+      frequency: backendHabit.frequency || 'Todo dia',
+      progress,
+      streak,
+      completedDates,
+      createdAt: backendHabit.createdAt || new Date().toISOString()
+    };
+  } catch (error) {
+    console.error('Error in mapHabitData:', error);
+    console.error('Backend habit data:', backendHabit);
+    throw error;
   }
-
-  return {
-    _id: backendHabit._id,
-    title: backendHabit.name,
-    description: backendHabit.description,
-    goal: backendHabit.goal,
-    category: backendHabit.category,
-    frequency: backendHabit.frequency,
-    progress,
-    streak,
-    completedDates,
-    createdAt: backendHabit.createdAt
-  };
 };
 
 export function HabitProvider({ children }: { children: React.ReactNode }) {
@@ -229,48 +228,61 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Toggling habit:', habitId);
       
-      // Update the local state immediately
-      setHabits(prevHabits => 
-        prevHabits.map(habit => {
-          if (habit._id !== habitId) return habit;
-          
-          // Update progress based on frequency
-          let newProgress = 0;
-          
-          switch (habit.frequency) {
-            case 'Todo dia':
-            case 'Diário':
-              // For daily habits, toggle between 0 and 100
-              newProgress = habit.progress === 0 ? 100 : 0;
-              break;
-            
-            case 'Semanal':
-              // For weekly habits, increment by 1/7 if not complete
-              if (habit.progress < 100) {
-                newProgress = Math.min(100, habit.progress + (100/7));
-              } else {
-                newProgress = 0; // Reset if already complete
-              }
-              break;
-            
-            default:
-              newProgress = habit.progress;
-          }
-          
-          return {
-            ...habit,
-            progress: newProgress
-          };
-        })
-      );
+      const habit = habits.find(h => h._id === habitId);
+      if (!habit) {
+        console.error('Habit not found:', habitId);
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      const isCompletedToday = habit.completedDates.includes(today);
+      
+      // Check if habit is already completed today
+      if (isCompletedToday) {
+        toast({
+          title: "Hábito já completado",
+          description: "Você já completou este hábito hoje. Tente novamente amanhã!",
+          variant: "default",
+        });
+        return;
+      }
+      
+      // Prepare the update data
+      const updateData = {
+        completed: true, // Always set to true since we're only allowing completion
+        date: today,
+        ...(habit.frequency === 'Todo dia' && { frequency: (habit.streak || 0) + 1 })
+      };
+
+      console.log('Sending update data:', updateData);
+
+      // Call the API to update progress
+      await updateHabitProgress(habitId, updateData);
+      
+      // Fetch fresh data from the backend
+      const backendHabits = await getHabitsApi();
+      console.log('Fetched habits after update:', backendHabits);
+      
+      if (!backendHabits) {
+        throw new Error('No habits data received after update');
+      }
+
+      const mappedHabits = backendHabits.map(mapHabitData);
+      console.log('Mapped habits after update:', mappedHabits);
+      setHabits(mappedHabits);
 
       toast({
         title: "Hábito atualizado",
         description: "Progresso atualizado com sucesso!",
       });
     } catch (error) {
+      console.error('Error in toggleHabit:', error);
       if (error instanceof AxiosError) {
-        console.error('Error toggling habit:', error);
+        console.error('Axios error details:', {
+          status: error.response?.status,
+          data: error.response?.data,
+          message: error.message
+        });
         if (error.response?.status === 401) {
           handleUnauthorized();
         } else {
@@ -280,16 +292,52 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
             variant: "destructive",
           });
         }
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível atualizar o hábito.",
+          variant: "destructive",
+        });
       }
     }
   };
 
-  const deleteHabit = (habitId: string) => {
-    setHabits((prev) => prev.filter((habit) => habit._id !== habitId));
-    toast({
-      title: "Hábito removido",
-      description: "O hábito foi removido com sucesso.",
-    });
+  const deleteHabit = async (habitId: string) => {
+    if (!isAuthenticated()) {
+      handleUnauthorized();
+      return;
+    }
+
+    try {
+      await deleteHabitApi(habitId);
+      
+      // Update local state after successful deletion
+      setHabits((prev) => prev.filter((habit) => habit._id !== habitId));
+      
+      toast({
+        title: "Hábito removido",
+        description: "O hábito foi removido com sucesso.",
+      });
+    } catch (error) {
+      if (error instanceof AxiosError) {
+        console.error('Error deleting habit:', error);
+        if (error.response?.status === 401) {
+          handleUnauthorized();
+        } else {
+          toast({
+            title: "Erro",
+            description: error.response?.data?.message || "Não foi possível remover o hábito.",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Erro",
+          description: "Não foi possível remover o hábito.",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   const updateHabitNotes = async (habitId: string, notes: string) => {

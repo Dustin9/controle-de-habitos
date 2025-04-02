@@ -1,11 +1,11 @@
 export type HabitCategory = "Saúde" | "Trabalho" | "Estudo" | "Lazer" | "Outros";
 
-export type HabitFrequency = "Diário" | "Semanal" | "Todo dia";
+export type HabitFrequency = "Semanal" | "Todo dia";
 
-interface ProgressEntry {
+export interface ProgressEntry {
   date: string;
   completed: boolean;
-  _id: string;
+  streak?: number;
 }
 
 export interface BackendHabit {

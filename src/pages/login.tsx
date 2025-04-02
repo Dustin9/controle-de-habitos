@@ -13,7 +13,7 @@ interface User {
     "user": {
       "id": string,
       "email": string,
-      "name": string // Adicione o name
+      "name": string
     }
 }
 
@@ -23,14 +23,23 @@ interface LoginProps {
 }
 
 export default function Login({user, setUserdata}: LoginProps) {
-  const [identifier, setIdentifier] = useState(""); // Alterado de email para identifier
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return; // Prevent multiple submissions
+    
     setLoading(true);
 
     try {
@@ -39,19 +48,19 @@ export default function Login({user, setUserdata}: LoginProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ identifier, password }), // Alterado para enviar identifier
+        body: JSON.stringify({ identifier, password }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        setAuthToken(data.token); // Using our auth utility instead of localStorage directly
+        setAuthToken(data.token);
         setUserdata(data);
-        navigate("/");
         toast({
           title: "Login realizado com sucesso!",
-          description: `Bem-vindo, ${data.user.name || data.user.email}!`, // Mostra o nome ou email
+          description: `Bem-vindo, ${data.user.name || data.user.email}!`,
         });
+        navigate("/");
       } else {
         throw new Error(data.message || "Erro ao fazer login");
       }
@@ -71,8 +80,8 @@ export default function Login({user, setUserdata}: LoginProps) {
       <ThemeToggle />
       <div className="max-w-md w-full space-y-8">
         <div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
-        Entre na sua conta
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
+            Entre na sua conta
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -89,6 +98,7 @@ export default function Login({user, setUserdata}: LoginProps) {
                 onChange={(e) => setIdentifier(e.target.value)}
                 placeholder="Email ou nome de usuario"
                 className="w-full rounded-xl hover:rounded-xl transition-all"
+                disabled={loading}
               />
             </div>
             <div>
@@ -103,6 +113,7 @@ export default function Login({user, setUserdata}: LoginProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Digite sua senha"
                 className="w-full rounded-xl hover:rounded-xl transition-all"
+                disabled={loading}
               />
             </div>
           </div>
@@ -122,7 +133,11 @@ export default function Login({user, setUserdata}: LoginProps) {
             </Link>
           </div>
 
-          <Button type="submit" className="w-full rounded-xl hover:rounded-xl transition-all" disabled={loading} >
+          <Button 
+            type="submit" 
+            className="w-full rounded-xl hover:rounded-xl transition-all" 
+            disabled={loading}
+          >
             {loading ? "Entrando..." : "Entrar"}
           </Button>
         </form>

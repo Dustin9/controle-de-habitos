@@ -16,10 +16,8 @@ interface PrivateRouteProps {
 }
 
 export default function PrivateRoute({ user }: PrivateRouteProps) {
-  // Check both the user object and the auth token
-  const isAuthorized = user && isAuthenticated();
-  
-  if (!isAuthorized) {
+  // Only check the auth token, as it's the source of truth
+  if (!isAuthenticated()) {
     return <Navigate to="/login" replace />;
   }
 

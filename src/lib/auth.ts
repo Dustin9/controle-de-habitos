@@ -12,4 +12,10 @@ export const removeAuthToken = () => {
 
 export const isAuthenticated = () => {
   return !!getAuthToken();
+};
+
+export const logout = () => {
+  removeAuthToken();
+  localStorage.removeItem('user');
+  window.location.href = '/login';
 }; 

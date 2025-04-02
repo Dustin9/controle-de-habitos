@@ -30,7 +30,7 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
     title: "",
     description: "",
     category: "Outros",
-    frequency: "Diário",
+    frequency: "Semanal",
     goal: 1,
   });
 
@@ -46,7 +46,7 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
       title: "",
       description: "",
       category: "Outros",
-      frequency: "Diário",
+      frequency: "Semanal",
       goal: 1,
     });
   };
@@ -68,7 +68,7 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
     "Outros",
   ];
 
-  const frequencies: HabitFrequency[] = ["Diário", "Semanal", "Todo dia"];
+  const frequencies: HabitFrequency[] = ["Semanal", "Todo dia"];
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -4,6 +4,9 @@ import { HabitCard } from "@/components/HabitCard";
 import { AddHabitDialog } from "@/components/AddHabitDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Button } from "@/components/ui/button";
+import { LogOut } from "lucide-react";
+import { logout } from "@/lib/auth";
 
 function HabitDashboard() {
   const { habits, addHabit, toggleHabit, deleteHabit, loading, updateHabitNotes } = useHabits();
@@ -18,18 +21,28 @@ function HabitDashboard() {
 
   return (
     <div className="container mx-auto max-w-4xl py-8 bg-background">
-      <ThemeToggle />
-      <div className="mb-8 flex items-center justify-between">
+      <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-4xl font-bold text-foreground">Meus Hábitos</h1>
           <p className="mt-2 text-foreground">
             Acompanhe seus hábitos e mantenha o foco nos seus objetivos
           </p>
         </div>
-        <AddHabitDialog onAdd={addHabit} />
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          <Button 
+            variant="outline" 
+            onClick={logout}
+            className="gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            Sair
+          </Button>
+          <AddHabitDialog onAdd={addHabit} />
+        </div>
       </div>
 
-      <ScrollArea className="h-[calc(100vh-16rem)] pr-4">
+      <ScrollArea className="h-[calc(100vh-12rem)]">
         <div className="grid gap-4 sm:grid-cols-2">
           {habits.length === 0 ? (
             <div className="col-span-2 rounded-lg border-2 border-dashed p-12 text-center">

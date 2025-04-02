@@ -32,6 +32,12 @@ interface ApiResponse<T> {
   message?: string;
 }
 
+interface UpdateProgressData {
+  completed: boolean;
+  date?: string;
+  frequency?: number;
+}
+
 // Create a new habit
 export const createHabit = async (habitData: CreateHabitData): Promise<BackendHabit> => {
   try {
@@ -57,12 +63,24 @@ export const getHabits = async (): Promise<BackendHabit[]> => {
 };
 
 // Update habit progress
-export const updateHabitProgress = async (habitId: string, date: string): Promise<BackendHabit> => {
+export const updateHabitProgress = async (habitId: string, data: UpdateProgressData): Promise<BackendHabit> => {
   try {
-    const response = await api.put<ApiResponse<BackendHabit>>(`${HABITS_ENDPOINT}/${habitId}/progress`, { date });
-    return response.data.data;
+    console.log('Updating habit progress:', { habitId, data });
+    const response = await api.put(`${HABITS_ENDPOINT}/${habitId}/progress`, data);
+    console.log('Update progress response:', response.data);
+    return response.data;
   } catch (error) {
     console.error('Error updating habit progress:', error);
+    throw error;
+  }
+};
+
+// Delete a habit
+export const deleteHabit = async (habitId: string): Promise<void> => {
+  try {
+    await api.delete(`${HABITS_ENDPOINT}/${habitId}`);
+  } catch (error) {
+    console.error('Error deleting habit:', error);
     throw error;
   }
 }; 
