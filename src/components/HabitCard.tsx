@@ -94,7 +94,7 @@ export function HabitCard({ habit, onToggle, onDelete, onUpdateNotes }: HabitCar
             </div>
           ) : (
             <>
-              <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Progresso</span>
                 <span className={cn(
                   "font-medium",
@@ -108,7 +108,7 @@ export function HabitCard({ habit, onToggle, onDelete, onUpdateNotes }: HabitCar
                 )}>
                   {Math.round(habit.progress)}%
                 </span>
-              </div>
+          </div>
               <Progress 
                 value={habit.progress}
                 className={cn(

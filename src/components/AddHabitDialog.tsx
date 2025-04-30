@@ -73,12 +73,12 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gap-2 rounded-xl hover:rounded-xl transition-all">
+        <Button className="gap-2 rounded-full hover:rounded-full transition-all">
           <Plus className="h-5 w-5" />
           Novo Hábito
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] rounded-xl">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Hábito</DialogTitle>
         </DialogHeader>
@@ -93,6 +93,7 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
               }
               placeholder="Ex: Beber água"
               required
+              className="rounded-lg"
             />
           </div>
           <div className="space-y-2">
@@ -105,6 +106,7 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
               }
               placeholder="Descreva seu hábito..."
               required
+              className="rounded-lg"
             />
           </div>
           <div className="space-y-2">
@@ -115,10 +117,10 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
                 setFormData((prev) => ({ ...prev, category: value }))
               }
             >
-              <SelectTrigger id="category">
+              <SelectTrigger id="category" className="rounded-lg">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-lg">
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
                     {category}
@@ -133,10 +135,10 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
               value={formData.frequency}
               onValueChange={handleFrequencyChange}
             >
-              <SelectTrigger id="frequency">
+              <SelectTrigger id="frequency" className="rounded-lg">
                 <SelectValue placeholder="Selecione uma frequência" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-lg">
                 {frequencies.map((frequency) => (
                   <SelectItem key={frequency} value={frequency}>
                     {frequency}
@@ -157,10 +159,11 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
                   setFormData((prev) => ({ ...prev, goal: Number(e.target.value) }))
                 }
                 required
+                className="rounded-lg"
               />
             </div>
           )}
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full rounded-full">
             Adicionar Hábito
           </Button>
         </form>

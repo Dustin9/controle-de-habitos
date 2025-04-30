@@ -2,7 +2,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/forgotPassaword";
@@ -11,8 +12,11 @@ import Login from "./pages/login";
 import PrivateRoute from "./components/PrivateRoute";
 import { useEffect, useState } from "react";
 import { getAuthToken } from "@/lib/auth";
+import { Questionnaire } from "@/components/Questionnaire";
+import { PageTransition } from "@/components/PageTransition";
 
 const queryClient = new QueryClient();
+
 interface User {   
   "message": string,
   "token": string,
@@ -23,7 +27,8 @@ interface User {
   }
 }
 
-const App = () => { 
+function AnimatedRoutes() {
+  const location = useLocation();
   const [userdata, setUserdata] = useState<User | null>(() => {
     const token = getAuthToken();
     const savedUser = localStorage.getItem('user');
@@ -33,7 +38,6 @@ const App = () => {
     return null;
   });
 
-  // Save user data to localStorage whenever it changes
   useEffect(() => {
     if (userdata) {
       localStorage.setItem('user', JSON.stringify(userdata));
@@ -43,20 +47,53 @@ const App = () => {
   }, [userdata]);
 
   return (
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route path="/login" element={
+          <PageTransition>
+            <Login user={userdata} setUserdata={setUserdata}/>
+          </PageTransition>
+        } />
+        <Route path="/register" element={
+          <PageTransition>
+            <Register />
+          </PageTransition>
+        } />
+        <Route path="/forgot-password" element={
+          <PageTransition>
+            <ForgotPassword />
+          </PageTransition>
+        } />
+        <Route path="/questionnaire" element={
+          <PageTransition>
+            <Questionnaire />
+          </PageTransition>
+        } />
+        <Route element={<PrivateRoute user={userdata}/>}>
+          <Route path="/" element={
+            <PageTransition>
+              <Index />
+            </PageTransition>
+          }/>
+          <Route path="*" element={
+            <PageTransition>
+              <NotFound />
+            </PageTransition>
+          } />
+        </Route>
+      </Routes>
+    </AnimatePresence>
+  );
+}
+
+const App = () => { 
+  return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login user={userdata} setUserdata={setUserdata}/>} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route element={<PrivateRoute user={userdata}/>}>
-              <Route path="/" element={<Index />}/>
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
+          <AnimatedRoutes />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>

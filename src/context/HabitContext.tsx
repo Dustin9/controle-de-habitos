@@ -20,14 +20,14 @@ const HabitContext = createContext<HabitContextType | undefined>(undefined);
 
 const mapHabitData = (backendHabit: BackendHabit): HabitType => {
   try {
-    // Get current date in local timezone
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const todayStr = today.toISOString().split('T')[0];
+  // Get current date in local timezone
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const todayStr = today.toISOString().split('T')[0];
 
     console.log('Mapping habit:', backendHabit.name);
-    console.log('Raw current date:', now.toString());
-    console.log('Normalized today:', todayStr);
+  console.log('Raw current date:', now.toString());
+  console.log('Normalized today:', todayStr);
 
     // Ensure progress is an array
     const progressArray = Array.isArray(backendHabit.progress) ? backendHabit.progress : [];
@@ -35,15 +35,15 @@ const mapHabitData = (backendHabit: BackendHabit): HabitType => {
     // Count total progress entries as streak
     const streak = progressArray.length;
 
-    // Convert backend dates to local timezone for comparison
+  // Convert backend dates to local timezone for comparison
     const completedDates = progressArray
       .filter(p => p && p.completed && p.date)
-      .map(p => {
+    .map(p => {
         try {
-          // Parse the UTC date and convert to local date
-          const utcDate = new Date(p.date);
-          const localDate = new Date(utcDate.getTime());
-          return localDate.toISOString().split('T')[0];
+      // Parse the UTC date and convert to local date
+      const utcDate = new Date(p.date);
+      const localDate = new Date(utcDate.getTime());
+      return localDate.toISOString().split('T')[0];
         } catch (error) {
           console.error('Error parsing date:', p.date);
           return null;
@@ -52,48 +52,48 @@ const mapHabitData = (backendHabit: BackendHabit): HabitType => {
       .filter((date): date is string => date !== null);
 
     console.log('Raw completed dates:', progressArray.filter(p => p.completed).map(p => p.date));
-    console.log('Normalized completed dates:', completedDates);
+  console.log('Normalized completed dates:', completedDates);
     console.log('Total progress entries (streak):', streak);
 
-    // Calculate progress based on frequency
-    let progress = 0;
+  // Calculate progress based on frequency
+  let progress = 0;
 
-    if (backendHabit.frequency === 'Todo dia') {
-      progress = completedDates.includes(todayStr) ? 100 : 0;
+  if (backendHabit.frequency === 'Todo dia') {
+    progress = completedDates.includes(todayStr) ? 100 : 0;
       console.log('Todo dia - Progress:', progress);
-    } else if (backendHabit.frequency === 'Semanal') {
-      // For "Semanal", calculate progress based on days in current week
-      const startOfWeek = new Date(today);
-      startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
-      
-      let completedThisWeek = 0;
-      const thisWeekDates = [];
-      for (let i = 0; i < 7; i++) {
-        const date = new Date(startOfWeek);
-        date.setDate(startOfWeek.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-        thisWeekDates.push(dateStr);
-        if (completedDates.includes(dateStr)) {
-          completedThisWeek++;
-        }
+  } else if (backendHabit.frequency === 'Semanal') {
+    // For "Semanal", calculate progress based on days in current week
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay()); // Start from Sunday
+    
+    let completedThisWeek = 0;
+    const thisWeekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
+      date.setDate(startOfWeek.getDate() + i);
+      const dateStr = date.toISOString().split('T')[0];
+      thisWeekDates.push(dateStr);
+      if (completedDates.includes(dateStr)) {
+        completedThisWeek++;
       }
-      progress = (completedThisWeek / 7) * 100;
-      console.log('Semanal - Week dates:', thisWeekDates);
-      console.log('Completed this week:', completedThisWeek, 'Progress:', progress);
     }
+    progress = (completedThisWeek / 7) * 100;
+    console.log('Semanal - Week dates:', thisWeekDates);
+    console.log('Completed this week:', completedThisWeek, 'Progress:', progress);
+  }
 
-    return {
-      _id: backendHabit._id,
+  return {
+    _id: backendHabit._id,
       title: backendHabit.name || '',
       description: backendHabit.description || '',
       goal: backendHabit.goal || 0,
       category: backendHabit.category || 'Saúde',
       frequency: backendHabit.frequency || 'Todo dia',
-      progress,
-      streak,
-      completedDates,
+    progress,
+    streak,
+    completedDates,
       createdAt: backendHabit.createdAt || new Date().toISOString()
-    };
+  };
   } catch (error) {
     console.error('Error in mapHabitData:', error);
     console.error('Backend habit data:', backendHabit);
@@ -265,8 +265,8 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
       
       if (!backendHabits) {
         throw new Error('No habits data received after update');
-      }
-
+          }
+          
       const mappedHabits = backendHabits.map(mapHabitData);
       console.log('Mapped habits after update:', mappedHabits);
       setHabits(mappedHabits);
@@ -312,12 +312,12 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
       await deleteHabitApi(habitId);
       
       // Update local state after successful deletion
-      setHabits((prev) => prev.filter((habit) => habit._id !== habitId));
+    setHabits((prev) => prev.filter((habit) => habit._id !== habitId));
       
-      toast({
-        title: "Hábito removido",
-        description: "O hábito foi removido com sucesso.",
-      });
+    toast({
+      title: "Hábito removido",
+      description: "O hábito foi removido com sucesso.",
+    });
     } catch (error) {
       if (error instanceof AxiosError) {
         console.error('Error deleting habit:', error);
