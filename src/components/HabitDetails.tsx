@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -12,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Habit } from "@/types/habit";
-import { Trash2 } from "lucide-react";
+import { Trash2, Calendar, Clock, Target, Pencil, Save, X } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,6 +21,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 interface HabitDetailsProps {
   habit: Habit;
@@ -35,6 +35,8 @@ interface HabitDetailsProps {
 export function HabitDetails({ habit, open, onOpenChange, onDelete, onUpdateNotes }: HabitDetailsProps) {
   const [notes, setNotes] = useState(habit.description || "");
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedNotes, setEditedNotes] = useState(notes);
 
   const handleDelete = () => {
     onDelete(habit._id);
@@ -42,58 +44,164 @@ export function HabitDetails({ habit, open, onOpenChange, onDelete, onUpdateNote
   };
 
   const handleSaveNotes = () => {
-    onUpdateNotes(habit._id, notes);
+    onUpdateNotes(habit._id, editedNotes);
+    setNotes(editedNotes);
+    setIsEditing(false);
   };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case "Saúde":
+        return "blue";
+      case "Trabalho":
+        return "green";
+      case "Estudo":
+        return "purple";
+      case "Lazer":
+        return "orange";
+      default:
+        return "slate";
+    }
+  };
+
+  const color = getCategoryColor(habit.category);
 
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>{habit.title}</DialogTitle>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-2xl font-bold">{habit.title}</DialogTitle>
+              <span className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium",
+                `bg-${color}-100 text-${color}-700 dark:bg-${color}-500/20 dark:text-${color}-300`
+              )}>
+                {habit.category}
+              </span>
+            </div>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm font-medium text-gray-500">Categoria</p>
-              <p className="mt-1">{habit.category}</p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-6"
+          >
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Clock className="h-4 w-4" />
+                  <span>Frequência</span>
+                </div>
+                <p className="font-medium">{habit.frequency}</p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>Criado em</span>
+                </div>
+                <p className="font-medium">
+                  {format(new Date(habit.createdAt), "PPP", { locale: ptBR })}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Target className="h-4 w-4" />
+                  <span>Meta</span>
+                </div>
+                <p className="font-medium">{habit.goal} dias</p>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Calendar className="h-4 w-4" />
+                  <span>Completado</span>
+                </div>
+                <p className="font-medium">{habit.completedDates.length} vezes</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Frequência</p>
-              <p className="mt-1">{habit.frequency}</p>
+
+            {/* Notes Section */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-muted-foreground">
+                  Observações
+                </label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    if (isEditing) {
+                      setEditedNotes(notes);
+                      setIsEditing(false);
+                    } else {
+                      setIsEditing(true);
+                    }
+                  }}
+                  className="gap-1"
+                >
+                  {isEditing ? (
+                    <>
+                      <X className="h-4 w-4" />
+                      Cancelar
+                    </>
+                  ) : (
+                    <>
+                      <Pencil className="h-4 w-4" />
+                      Editar
+                    </>
+                  )}
+                </Button>
+              </div>
+              <AnimatePresence mode="wait">
+                {isEditing ? (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="space-y-3"
+                  >
+                    <Textarea
+                      value={editedNotes}
+                      onChange={(e) => setEditedNotes(e.target.value)}
+                      placeholder="Adicione suas observações aqui..."
+                      className="min-h-[100px] resize-none"
+                    />
+                    <Button 
+                      onClick={handleSaveNotes} 
+                      className="w-full gap-2"
+                    >
+                      <Save className="h-4 w-4" />
+                      Salvar Observações
+                    </Button>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="rounded-lg border p-4 min-h-[100px] bg-muted/50"
+                  >
+                    {notes || (
+                      <p className="text-sm text-muted-foreground">
+                        Nenhuma observação adicionada ainda.
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Data de Criação</p>
-              <p className="mt-1">
-                {format(new Date(habit.createdAt), "PPP", { locale: ptBR })}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-500">Meta</p>
-              <p className="mt-1">{habit.goal} dias</p>
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-500">
-                Observações
-              </label>
-              <Textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Adicione suas observações aqui..."
-                className="min-h-[100px]"
-              />
-              <Button onClick={handleSaveNotes} className="w-full">
-                Salvar Observações
-              </Button>
-            </div>
+
+            {/* Delete Button */}
             <Button
               variant="destructive"
-              className="w-full"
+              className="w-full gap-2"
               onClick={() => setShowDeleteAlert(true)}
             >
-              <Trash2 className="mr-2 h-4 w-4" />
+              <Trash2 className="h-4 w-4" />
               Excluir Hábito
             </Button>
-          </div>
+          </motion.div>
         </DialogContent>
       </Dialog>
 
@@ -108,7 +216,12 @@ export function HabitDetails({ habit, open, onOpenChange, onDelete, onUpdateNote
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete}>Excluir</AlertDialogAction>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

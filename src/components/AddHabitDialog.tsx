@@ -5,7 +5,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,11 +20,12 @@ import { HabitCategory, HabitFormData, HabitFrequency } from "@/types/habit";
 import { Plus } from "lucide-react";
 
 interface AddHabitDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onAdd: (data: HabitFormData) => Promise<void>;
 }
 
-export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
-  const [open, setOpen] = useState(false);
+export function AddHabitDialog({ open, onOpenChange, onAdd }: AddHabitDialogProps) {
   const [formData, setFormData] = useState<HabitFormData>({
     title: "",
     description: "",
@@ -41,7 +41,7 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
       ? { ...formData, goal: undefined }
       : formData;
     await onAdd(submitData);
-    setOpen(false);
+    onOpenChange(false);
     setFormData({
       title: "",
       description: "",
@@ -71,13 +71,7 @@ export function AddHabitDialog({ onAdd }: AddHabitDialogProps) {
   const frequencies: HabitFrequency[] = ["Semanal", "Todo dia"];
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2 rounded-full hover:rounded-full transition-all">
-          <Plus className="h-5 w-5" />
-          Novo Hábito
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px] rounded-xl">
         <DialogHeader>
           <DialogTitle>Adicionar Novo Hábito</DialogTitle>
